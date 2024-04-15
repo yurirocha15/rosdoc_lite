@@ -116,9 +116,20 @@ def prepare_tagfiles(tagfile_spec, tagfile_dir, output_subfolder):
         print(tag_pair)
         if tag_pair['location'].find("http://") == 0:
             #We need to download the file from somewhere online
-            import urllib2
             try:
-                ret = urllib2.urlopen(tag_pair['location'])
+                if sys.version_info.major < 3:
+                    # python 2
+                    from urllib2 import urlopen, URLError, HTTPError
+                else:
+                    # python 3
+                    from urllib.request import urlopen
+                    from urllib.error import URLError, HTTPError
+            except ImportError:
+                print("Could not import urllib, skipping", file=sys.stderr)
+                continue
+
+            try:
+                ret = urlopen(tag_pair['location'])
                 if ret.code != 200:
                     print("Could not fetch the tagfile from %s, skipping" % tag_pair['location'], file=sys.stderr)
                     continue
@@ -128,7 +139,7 @@ def prepare_tagfiles(tagfile_spec, tagfile_dir, output_subfolder):
                 tagfile.write(ret.read())
                 tagfile.close()
                 tagfile_string += "%s=%s " % (tagfile_path, get_doc_path(output_subfolder, tag_pair))
-            except (urllib2.URLError, urllib2.HTTPError) as e:
+            except (URLError, HTTPError) as e:
                 print("Could not fetch the tagfile from %s, skipping" % tag_pair['location'], file=sys.stderr)
                 continue
         elif tag_pair['location'].find("file://") == 0:
