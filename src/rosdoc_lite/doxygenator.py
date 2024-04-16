@@ -136,14 +136,12 @@ def prepare_tagfiles(tagfile_spec, tagfile_dir, output_subfolder):
                 tagfile_name = os.path.basename(tag_pair['location'])
                 tagfile_path = os.path.join(tagfile_dir, tagfile_name)
                 tagfile = open(tagfile_path, 'w')
-                enc = ""
                 if sys.version_info.major < 3:
                     # python 2
-                    enc = ret.headers.getparam('charset')
+                    tagfile.write(ret.read())
                 else:
                     # python 3
-                    enc = ret.headers.get_param('charset')
-                tagfile.write(ret.read().decode(enc or 'utf-8'))
+                    tagfile.write(ret.read().decode(ret.headers.get_content_charset() or 'utf-8'))
                 tagfile.close()
                 tagfile_string += "%s=%s " % (tagfile_path, get_doc_path(output_subfolder, tag_pair))
             except (URLError, HTTPError) as e:
