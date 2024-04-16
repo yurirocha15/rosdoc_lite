@@ -53,6 +53,8 @@ class TestGetDocPath(unittest.TestCase):
             with patch(urlopen_name()) as mock_urlopen:
                 mock_urlopen.return_value.code = 200
                 mock_urlopen.return_value.read.return_value = b"tagfile_content"
+                mock_urlopen.return_value.headers.getparam.return_value = "utf-8"  # python 2
+                mock_urlopen.return_value.headers.get_param.return_value = "utf-8"  # python 3
 
                 result = doxy.prepare_tagfiles(self.tagfile_spec, self.tagfile_dir, self.output_subfolder)
 
